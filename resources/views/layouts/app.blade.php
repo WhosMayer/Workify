@@ -60,7 +60,7 @@ tailwind.config = {
             <span>Panel</span>
         </a>
 
-        {{-- Empleados: visible para todos según enfoque B (admin, editor, empleado) --}}
+        {{-- Empleados: visible para todos los roles --}}
         @if(auth()->user()?->canViewEmployees())
         <a href="{{ route('employees.index') }}"
            class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all
@@ -77,8 +77,8 @@ tailwind.config = {
             <span>Tareas</span>
         </a>
 
-        {{-- Nueva Tarea: admin + editor (gestionan tareas) --}}
-        @if(auth()->user()?->isAdmin() || auth()->user()?->isEditor())
+        {{-- Nueva Tarea: solo admin y editor pueden crear tareas --}}
+        @if(auth()->user()?->canCreateTasks())
         <a href="{{ route('tasks.create') }}"
            class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all
            {{ request()->routeIs('tasks.*') ? 'bg-primary/10 text-primary font-semibold' : 'text-slate-600 hover:bg-slate-50' }}">
@@ -116,15 +116,6 @@ tailwind.config = {
         <div>
             <h2 class="text-2xl font-bold tracking-tight">@yield('page-title', 'Panel')</h2>
             <p class="text-sm text-slate-500">@yield('page-subtitle', 'Bienvenido de nuevo.')</p>
-        </div>
-        <div class="flex items-center gap-4">
-            <label class="relative flex items-center">
-                <span class="material-symbols-outlined absolute left-3 text-slate-400 text-xl">search</span>
-                <input class="pl-10 pr-4 py-2 bg-slate-100 border-none rounded-xl text-sm focus:ring-2 focus:ring-primary w-64" placeholder="Buscar datos..." type="text"/>
-            </label>
-            <button class="p-2 bg-slate-100 rounded-xl text-slate-600 hover:bg-primary/10 hover:text-primary transition-all">
-                <span class="material-symbols-outlined">notifications</span>
-            </button>
         </div>
     </header>
 

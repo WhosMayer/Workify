@@ -51,10 +51,12 @@
             </p>
         </div>
 
+        @if(auth()->user()?->isAdmin())
         <a href="{{ route('employees.edit', $employee) }}"
            class="mt-6 w-full flex items-center justify-center gap-2 bg-primary text-white py-2.5 rounded-xl font-bold hover:brightness-110 transition-all">
             <span class="material-symbols-outlined text-xl">edit</span> Editar
         </a>
+        @endif
     </div>
 
     {{-- Tareas --}}

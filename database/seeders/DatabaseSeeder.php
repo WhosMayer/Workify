@@ -21,6 +21,8 @@ class DatabaseSeeder extends Seeder
     {
         // ── 1. EMPLEADOS ──────────────────────────────────────────
         $employees = [
+            ['name' => 'Mayer Gómez',     'email' => 'mayer@empresa.com',  'position' => 'Líder Técnico',          'department' => 'Tecnología',  'phone' => '+57 300 555 7788', 'hire_date' => '2019-02-10', 'status' => 'active'],
+            ['name' => 'Milton Muñoz',    'email' => 'milton@empresa.com', 'position' => 'Scrum Master',           'department' => 'Gerencia',    'phone' => '+57 301 999 3344', 'hire_date' => '2020-06-15', 'status' => 'active'],
             ['name' => 'Ana García',      'email' => 'ana@empresa.com',    'position' => 'Desarrolladora Frontend', 'department' => 'Tecnología',  'phone' => '+57 300 111 2233', 'hire_date' => '2022-03-15', 'status' => 'active'],
             ['name' => 'Carlos López',    'email' => 'carlos@empresa.com', 'position' => 'Desarrollador Backend',  'department' => 'Tecnología',  'phone' => '+57 301 444 5566', 'hire_date' => '2021-07-01', 'status' => 'active'],
             ['name' => 'María Torres',    'email' => 'maria@empresa.com',  'position' => 'Diseñadora UX/UI',       'department' => 'Diseño',       'phone' => '+57 302 777 8899', 'hire_date' => '2023-01-10', 'status' => 'active'],
@@ -45,6 +47,8 @@ class DatabaseSeeder extends Seeder
 
         // ── 3. TAREAS ─────────────────────────────────────────────
         // Recupera empleados por nombre para asignarles tareas
+        $mayer   = Employee::where('name', 'Mayer Gómez')->first();
+        $milton  = Employee::where('name', 'Milton Muñoz')->first();
         $ana     = Employee::where('name', 'Ana García')->first();
         $carlos  = Employee::where('name', 'Carlos López')->first();
         $maria   = Employee::where('name', 'María Torres')->first();
@@ -54,37 +58,37 @@ class DatabaseSeeder extends Seeder
         // Tareas en PENDIENTE
         $pending->tasks()->createMany([
             ['title' => 'Diseñar pantalla de login',          'description' => 'Crear mockup en Figma con los nuevos lineamientos de marca.',           'employee_id' => $maria->id,  'priority' => 'high',   'due_date' => now()->addDays(5),  'position' => 0],
-            ['title' => 'Configurar entorno de staging',      'description' => 'Instalar y configurar el servidor de pruebas en AWS.',                  'employee_id' => $carlos->id, 'priority' => 'medium', 'due_date' => now()->addDays(7),  'position' => 1],
+            ['title' => 'Configurar entorno de staging',      'description' => 'Instalar y configurar el servidor de pruebas en AWS.',                  'employee_id' => $mayer->id,  'priority' => 'medium', 'due_date' => now()->addDays(7),  'position' => 1],
             ['title' => 'Documentar API REST',                'description' => 'Generar documentación con Swagger para todos los endpoints del módulo.', 'employee_id' => $ana->id,    'priority' => 'low',    'due_date' => now()->addDays(14), 'position' => 2],
-            ['title' => 'Reunión de planificación Sprint 4',  'description' => null,                                                                     'employee_id' => $laura->id,  'priority' => 'high',   'due_date' => now()->addDays(2),  'position' => 3],
+            ['title' => 'Reunión de planificación Sprint 4',  'description' => null,                                                                     'employee_id' => $milton->id, 'priority' => 'high',   'due_date' => now()->addDays(2),  'position' => 3],
         ]);
 
         // Tareas EN PROGRESO
         $inProgress->tasks()->createMany([
-            ['title' => 'Implementar módulo de reportes',     'description' => 'Generar PDFs con gráficas de ventas mensuales.',                        'employee_id' => $carlos->id, 'priority' => 'high',   'due_date' => now()->addDays(3),  'position' => 0],
+            ['title' => 'Implementar módulo de reportes',     'description' => 'Generar PDFs con gráficas de ventas mensuales.',                        'employee_id' => $milton->id, 'priority' => 'high',   'due_date' => now()->addDays(3),  'position' => 0],
             ['title' => 'Refactorizar módulo de pagos',       'description' => 'Migrar de la librería antigua a Stripe v3.',                            'employee_id' => $ana->id,    'priority' => 'high',   'due_date' => now()->subDays(1),  'position' => 1],
             ['title' => 'Pruebas de regresión v2.1',          'description' => 'Ejecutar suite completa de tests automatizados.',                       'employee_id' => $pedro->id,  'priority' => 'medium', 'due_date' => now()->addDays(4),  'position' => 2],
         ]);
 
         // Tareas COMPLETADAS
         $done->tasks()->createMany([
-            ['title' => 'Setup inicial del proyecto Laravel', 'description' => 'Instalación, configuración de .env y conexión a la base de datos.',     'employee_id' => $carlos->id, 'priority' => 'high',   'due_date' => now()->subDays(10), 'position' => 0],
+            ['title' => 'Setup inicial del proyecto Laravel', 'description' => 'Instalación, configuración de .env y conexión a la base de datos.',     'employee_id' => $mayer->id,  'priority' => 'high',   'due_date' => now()->subDays(10), 'position' => 0],
             ['title' => 'Diseño del sistema de base de datos','description' => 'Diagrama ER y definición de todas las tablas y relaciones.',             'employee_id' => $maria->id,  'priority' => 'high',   'due_date' => now()->subDays(8),  'position' => 1],
-            ['title' => 'CRUD de empleados',                  'description' => 'Implementar controlador, vistas y rutas para la .',  'employee_id' => $ana->id,    'priority' => 'medium', 'due_date' => now()->subDays(5),  'position' => 2],
-            ['title' => 'Autenticación con Laravel Breeze',   'description' => 'Login, registro y recuperación de contraseña.',                         'employee_id' => $pedro->id,  'priority' => 'medium', 'due_date' => now()->subDays(3),  'position' => 3],
+            ['title' => 'Módulo de gestión de empleados',     'description' => 'Implementar el CRUD completo para administrar empleados (crear, editar, eliminar y listar).', 'employee_id' => $ana->id, 'priority' => 'medium', 'due_date' => now()->subDays(5), 'position' => 2],
+            ['title' => 'Autenticación con Laravel Breeze',   'description' => 'Login, registro y recuperación de contraseña.',                         'employee_id' => $milton->id, 'priority' => 'medium', 'due_date' => now()->subDays(3),  'position' => 3],
         ]);
 
         // ── 4. USUARIOS DE PRUEBA CON ROLES ─────────────────────
-        // Creamos los 3 usuarios de prueba con updateOrCreate para que sea seguro.
+        // Usuarios de acceso al sistema (vinculados a sus registros de empleado)
 
-        // Admin (mayer@admin.com con contraseña "password")
+        // Admin
         \App\Models\User::updateOrCreate(
             ['email' => 'mayer@admin.com'],
             [
-                'name'        => 'Mayer Admin',
+                'name'        => 'Mayer Gómez',
                 'password'    => bcrypt('password'),
                 'role'        => 'admin',
-                'employee_id' => $laura->id,
+                'employee_id' => $mayer->id,
             ]
         );
 
@@ -92,14 +96,14 @@ class DatabaseSeeder extends Seeder
         \App\Models\User::updateOrCreate(
             ['email' => 'milton@editor.com'],
             [
-                'name'        => 'Milton Editor',
+                'name'        => 'Milton Muñoz',
                 'password'    => bcrypt('password'),
                 'role'        => 'editor',
-                'employee_id' => $carlos->id,
+                'employee_id' => $milton->id,
             ]
         );
 
-        // Empleado (vinculado a Ana García para que solo vea sus tareas)
+        // Empleado normal (vinculado a Ana García)
         \App\Models\User::updateOrCreate(
             ['email' => 'ana@empleado.com'],
             [
@@ -113,10 +117,10 @@ class DatabaseSeeder extends Seeder
         $this->command->info('✅ Datos de prueba creados exitosamente.');
         $this->command->info('   - 6 empleados');
         $this->command->info('   - 1 tablero con 3 columnas');
-        $this->command->info('   - 11 tareas distribuidas');
+        $this->command->info('   - 11 tareas distribuidas (incluyendo tareas de Mayer y Milton)');
         $this->command->info('   - Usuarios de prueba (todos con password = "password"):');
-        $this->command->info('       mayer@admin.com   → rol admin');
-        $this->command->info('       milton@editor.com → rol editor');
-        $this->command->info('       ana@empleado.com  → rol empleado (solo ve tareas de Ana García)');
+        $this->command->info('       mayer@admin.com   → Mayer Gómez (admin)');
+        $this->command->info('       milton@editor.com → Milton Muñoz (editor)');
+        $this->command->info('       ana@empleado.com  → Ana García (empleado, solo ve sus propias tareas)');
     }
 }

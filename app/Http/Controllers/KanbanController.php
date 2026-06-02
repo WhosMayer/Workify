@@ -6,32 +6,17 @@ use App\Models\Board;
 use App\Models\Column;
 use Illuminate\Http\Request;
 
-/**
- * KanbanController
- *
- * Muestra el tablero Kanban con todas sus columnas y tareas.
- */
 class KanbanController extends Controller
 {
-    /**
-     * Muestra el tablero Kanban principal.
-     * Ruta: GET /kanban
-     *
-     * Usa eager loading (with) para cargar todo en una sola consulta:
-     * Board → columns → tasks → employee
-     * Sin esto, Laravel haría N+1 consultas (muy lento).
-     */
     public function index()
     {
         $user = auth()->user();
 
-        // Si es empleado, solo verá las tareas asignadas a su empleado vinculado
         $employeeIdFilter = null;
         if ($user && $user->isEmpleado() && $user->employee_id) {
             $employeeIdFilter = $user->employee_id;
         }
 
-        // Carga el tablero con columnas y tareas
         $board = Board::with([
             'columns' => function ($query) {
                 $query->orderBy('position');
@@ -39,14 +24,12 @@ class KanbanController extends Controller
             'columns.tasks' => function ($query) use ($employeeIdFilter) {
                 $query->orderBy('position')->with('employee');
 
-                // Filtro clave para rol "empleado": solo sus tareas
                 if ($employeeIdFilter) {
                     $query->where('employee_id', $employeeIdFilter);
                 }
             }
         ])->first();
 
-        // Si no hay tablero, créalo con las 3 columnas por defecto
         if (!$board) {
             $board = Board::create([
                 'name'        => 'Tablero Principal',
@@ -63,7 +46,6 @@ class KanbanController extends Controller
                 $board->columns()->create($col);
             }
 
-            // Recarga aplicando el mismo filtro
             $board->load([
                 'columns.tasks' => function ($query) use ($employeeIdFilter) {
                     $query->orderBy('position')->with('employee');

@@ -21,6 +21,10 @@ class TaskController extends Controller
      */
     public function create()
     {
+        if (!auth()->user()->canCreateTasks()) {
+            abort(403, 'No tienes permiso para crear tareas.');
+        }
+
         $employees = Employee::active()->orderBy('name')->get();
         $columns   = Column::with('board')->orderBy('position')->get();
         return view('tasks.create', compact('employees', 'columns'));
@@ -32,6 +36,10 @@ class TaskController extends Controller
      */
     public function store(Request $request)
     {
+        if (!auth()->user()->canCreateTasks()) {
+            abort(403, 'No tienes permiso para crear tareas.');
+        }
+
         $validated = $request->validate([
             'title'       => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -56,6 +64,10 @@ class TaskController extends Controller
      */
     public function edit(Task $task)
     {
+        if (!auth()->user()->canCreateTasks()) {
+            abort(403, 'No tienes permiso para editar tareas.');
+        }
+
         $employees = Employee::active()->orderBy('name')->get();
         $columns   = Column::with('board')->orderBy('position')->get();
         return view('tasks.edit', compact('task', 'employees', 'columns'));
@@ -67,6 +79,10 @@ class TaskController extends Controller
      */
     public function update(Request $request, Task $task)
     {
+        if (!auth()->user()->canCreateTasks()) {
+            abort(403, 'No tienes permiso para editar tareas.');
+        }
+
         $validated = $request->validate([
             'title'       => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -88,20 +104,44 @@ class TaskController extends Controller
      */
     public function destroy(Task $task)
     {
+        if (!auth()->user()->canCreateTasks()) {
+            abort(403, 'No tienes permiso para eliminar tareas.');
+        }
+
         $task->delete();
         return redirect()->route('kanban.index')
                          ->with('success', 'Tarea eliminada.');
     }
 
     /**
-     * Mueve una tarea a otra columna (llamado via AJAX desde el Kanban).
-     * Ruta: POST /tasks/{task}/move
-     *
-     * El JavaScript del frontend envía: { column_id: X, position: Y }
-     * Este método actualiza la columna y posición de la tarea.
+     * Mueve una tarea entre columnas (AJAX desde el Kanban).
      */
     public function move(Request $request, Task $task)
     {
+        $user = auth()->user();
+
+        if ($user->isEmpleado() && $task->employee_id !== $user->employee_id) {
+            return response()->json(['success' => false, 'message' => 'No puedes mover tareas de otros.'], 403);
+        }
+
+        $column = Column::find($request->column_id);
+
+        if (!$column) {
+            return response()->json(['success' => false, 'message' => 'Columna no válida.'], 422);
+        }
+
+        // Regla: Empleado puede completar su tarea, pero no puede sacarla de "Completado"
+        if ($user->isEmpleado()) {
+            $currentColumn = $task->column;
+
+            if ($currentColumn && $currentColumn->name === 'Completado' && $column->name !== 'Completado') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No puedes regresar una tarea que ya está completada. Contacta a un Editor o Admin.'
+                ], 403);
+            }
+        }
+
         $request->validate([
             'column_id' => 'required|exists:columns,id',
             'position'  => 'required|integer|min:0',
@@ -112,7 +152,6 @@ class TaskController extends Controller
             'position'  => $request->position,
         ]);
 
-        // response()->json() → devuelve JSON al frontend (para AJAX)
         return response()->json(['success' => true, 'task' => $task]);
     }
 }

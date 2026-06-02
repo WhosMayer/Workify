@@ -9,42 +9,45 @@ use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| Rutas públicas (Breeze auth)
+| Rutas públicas
 |--------------------------------------------------------------------------
 */
 Route::get('/', function () {
-    return view('welcome');
-})->name('home');
+    if (auth()->check()) {
+        return redirect()->route('dashboard');
+    }
+    return redirect()->route('login');
+});
 
 require __DIR__.'/auth.php';
 
 /*
 |--------------------------------------------------------------------------
-| Rutas protegidas de la aplicación (tu UI bonita + Breeze auth)
+| Rutas protegidas
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    // Dashboard principal (el bonito con estadísticas y gráficos)
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Ver lista de empleados (con salarios) — accesible para admin, editor y empleado (enfoque B)
+    // Listado y detalle de empleados (disponible para todos los roles)
     Route::resource('employees', EmployeeController::class)->only(['index', 'show']);
 
-    // Crear, editar y eliminar empleados — SOLO admin
-    // El editor NO tiene poder sobre empleados (solo ve la lista y gestiona tareas)
+    // CRUD de empleados (solo administrador)
     Route::resource('employees', EmployeeController::class)
         ->only(['create', 'store', 'edit', 'update', 'destroy'])
         ->middleware('role:admin');
 
-    // Tareas
-    Route::resource('tasks', TaskController::class)->except(['index', 'show']);
+    // Crear, editar y eliminar tareas (solo admin y editor)
+    Route::middleware('role:admin,editor')->group(function () {
+        Route::resource('tasks', TaskController::class)->except(['index', 'show']);
+    });
+
     Route::post('/tasks/{task}/move', [TaskController::class, 'move'])->name('tasks.move');
 
-    // Tablero Kanban
     Route::get('/kanban', [KanbanController::class, 'index'])->name('kanban.index');
 
-    // Perfil de usuario (de Breeze)
+    // Perfil de usuario
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

@@ -57,7 +57,7 @@ class User extends Authenticatable
         return $this->belongsTo(\App\Models\Employee::class);
     }
 
-    // ==================== Helpers de Rol ====================
+    // Helpers de rol y permisos
 
     public function isAdmin(): bool
     {
@@ -79,15 +79,24 @@ class User extends Authenticatable
      */
     public function canViewEmployees(): bool
     {
-        return true; // admin, editor y empleado
+        return true;
     }
 
     /**
-     * Puede crear/editar/eliminar empleados (SOLO admin)
-     * Editor NO tiene poder sobre empleados — solo ve la lista y gestiona tareas.
+     * Puede crear, editar y eliminar empleados.
+     * Solo disponible para administradores.
      */
     public function canManageEmployees(): bool
     {
         return $this->role === 'admin';
+    }
+
+    /**
+     * Puede crear nuevas tareas y asignarlas.
+     * Solo admin y editor pueden crear tareas.
+     */
+    public function canCreateTasks(): bool
+    {
+        return in_array($this->role, ['admin', 'editor']);
     }
 }

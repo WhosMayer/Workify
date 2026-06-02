@@ -13,11 +13,13 @@
         </span>
         @endforeach
     </div>
+    @if(auth()->user()?->canCreateTasks())
     <a href="{{ route('tasks.create') }}"
        class="flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-xl font-bold hover:brightness-110 transition-all shadow-lg shadow-primary/20">
         <span class="material-symbols-outlined text-xl">add_task</span>
         Nueva Tarea
     </a>
+    @endif
 </div>
 
 {{-- TABLERO --}}
@@ -39,13 +41,20 @@
              data-column-id="{{ $column->id }}">
 
             @foreach($column->tasks as $task)
-            <div class="task-card bg-white rounded-xl border border-slate-200 p-4 cursor-grab
-                        hover:shadow-md hover:border-primary/30 transition-all select-none"
-                 data-task-id="{{ $task->id }}">
+            @php
+                $isLockedForEmpleado = auth()->user()?->isEmpleado() && $column->name === 'Completado';
+            @endphp
+            <div class="task-card bg-white rounded-xl border border-slate-200 p-4 {{ $isLockedForEmpleado ? 'cursor-default opacity-90' : 'cursor-grab hover:shadow-md hover:border-primary/30' }} transition-all select-none"
+                 data-task-id="{{ $task->id }}"
+                 @if($isLockedForEmpleado) data-locked="true" @endif
+            >
 
                 {{-- Header tarjeta --}}
                 <div class="flex justify-between items-start mb-2">
                     <h3 class="font-semibold text-slate-800 text-sm leading-snug flex-1 pr-2">{{ $task->title }}</h3>
+
+                    {{-- Solo admin y editor ven el menú de editar/eliminar --}}
+                    @if(auth()->user()?->canCreateTasks())
                     <div class="relative flex-shrink-0">
                         <button onclick="toggleMenu(this); event.stopPropagation();"
                                 class="text-slate-300 hover:text-slate-600 transition p-1 rounded-lg hover:bg-slate-100">
@@ -66,6 +75,7 @@
                             </form>
                         </div>
                     </div>
+                    @endif
                 </div>
 
                 @if($task->description)
@@ -125,6 +135,7 @@ document.querySelectorAll('.kanban-column').forEach(column => {
         animation: 150,
         ghostClass: 'sortable-ghost',
         dragClass: 'sortable-drag',
+        filter: '[data-locked="true"]',   // Evita que se pueda arrastrar tareas bloqueadas
         onEnd: function(evt) {
             const taskId   = evt.item.dataset.taskId;
             const columnId = evt.to.dataset.columnId;
