@@ -56,6 +56,22 @@ class KanbanController extends Controller
             ]);
         }
 
+        // Post-filter for robustness: ensure empleado users only ever see their own tasks
+        // (or none if they have no linked employee record). This guarantees the rule even
+        // if eager loading constraints behave unexpectedly in some edge cases.
+        if ($user && $user->isEmpleado()) {
+            $empId = $user->employee_id;
+            foreach ($board->columns as $column) {
+                $tasks = $column->tasks;
+                if ($empId) {
+                    $filtered = $tasks->where('employee_id', $empId);
+                } else {
+                    $filtered = collect();
+                }
+                $column->setRelation('tasks', $filtered->values());
+            }
+        }
+
         return view('kanban.index', compact('board'));
     }
 }

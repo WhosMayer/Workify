@@ -12,7 +12,7 @@ class DashboardController extends Controller
     public function index()
     {
         $user = auth()->user();
-        $isEmpleado = $user && $user->isEmpleado() && $user->employee_id;
+        $isEmpleado = $user && $user->isEmpleado();
 
         $totalEmployees  = Employee::count();
         $pendingColumn   = Column::where('name', 'Pendiente')->first();
@@ -20,15 +20,22 @@ class DashboardController extends Controller
         $doneColumn      = Column::where('name', 'Completado')->first();
 
         if ($isEmpleado) {
-            $tasksPending    = $pendingColumn  ? Task::where('column_id', $pendingColumn->id)->where('employee_id', $user->employee_id)->count()  : 0;
-            $tasksInProgress = $progressColumn ? Task::where('column_id', $progressColumn->id)->where('employee_id', $user->employee_id)->count() : 0;
-            $tasksCompleted  = $doneColumn     ? Task::where('column_id', $doneColumn->id)->where('employee_id', $user->employee_id)->count()     : 0;
+            $empId = $user->employee_id;
+            if ($empId) {
+                $tasksPending    = $pendingColumn  ? Task::where('column_id', $pendingColumn->id)->where('employee_id', $empId)->count()  : 0;
+                $tasksInProgress = $progressColumn ? Task::where('column_id', $progressColumn->id)->where('employee_id', $empId)->count() : 0;
+                $tasksCompleted  = $doneColumn     ? Task::where('column_id', $doneColumn->id)->where('employee_id', $empId)->count()     : 0;
 
-            $recentTasks = Task::with(['employee', 'column'])
-                ->where('employee_id', $user->employee_id)
-                ->latest()
-                ->take(4)
-                ->get();
+                $recentTasks = Task::with(['employee', 'column'])
+                    ->where('employee_id', $empId)
+                    ->latest()
+                    ->take(4)
+                    ->get();
+            } else {
+                // New or incomplete empleado without linked employee record -> no tasks visible
+                $tasksPending = $tasksInProgress = $tasksCompleted = 0;
+                $recentTasks = collect();
+            }
         } else {
             $tasksPending    = $pendingColumn  ? Task::where('column_id', $pendingColumn->id)->count()  : 0;
             $tasksInProgress = $progressColumn ? Task::where('column_id', $progressColumn->id)->count() : 0;

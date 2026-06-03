@@ -89,6 +89,7 @@ class DatabaseSeeder extends Seeder
                 'password'    => bcrypt('password'),
                 'role'        => 'admin',
                 'employee_id' => $mayer->id,
+                'email_verified_at' => now(),
             ]
         );
 
@@ -100,6 +101,7 @@ class DatabaseSeeder extends Seeder
                 'password'    => bcrypt('password'),
                 'role'        => 'editor',
                 'employee_id' => $milton->id,
+                'email_verified_at' => now(),
             ]
         );
 
@@ -111,6 +113,7 @@ class DatabaseSeeder extends Seeder
                 'password'    => bcrypt('password'),
                 'role'        => 'empleado',
                 'employee_id' => $ana->id,
+                'email_verified_at' => now(),
             ]
         );
 

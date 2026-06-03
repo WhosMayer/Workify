@@ -34,9 +34,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('employees', EmployeeController::class)->only(['index', 'show']);
 
     // CRUD de empleados (solo administrador)
-    Route::resource('employees', EmployeeController::class)
-        ->only(['create', 'store', 'edit', 'update', 'destroy'])
-        ->middleware('role:admin');
+    Route::middleware('role:admin')->group(function () {
+        Route::resource('employees', EmployeeController::class)
+            ->only(['create', 'store', 'edit', 'update', 'destroy']);
+    });
 
     // Crear, editar y eliminar tareas (solo admin y editor)
     Route::middleware('role:admin,editor')->group(function () {

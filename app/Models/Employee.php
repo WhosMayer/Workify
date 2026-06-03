@@ -49,6 +49,16 @@ class Employee extends Model
     }
 
     /**
+     * Relación: Un empleado PUEDE tener un usuario de login vinculado (one-to-one inverse)
+     * Uso: $employee->user  →  devuelve el User asociado (si existe)
+     * Esto permite mostrar el email de login (ej: mayer@admin.com) en lugar del email interno del empleado (@empresa.com)
+     */
+    public function user()
+    {
+        return $this->hasOne(User::class);
+    }
+
+    /**
      * Scope: filtrar solo empleados activos
      * Uso: Employee::active()->get()
      */

@@ -31,7 +31,7 @@
         <div class="mt-6 text-sm text-slate-600 space-y-2 text-left border-t border-slate-100 pt-4">
             <p class="flex items-center gap-2">
                 <span class="material-symbols-outlined text-slate-400 text-lg">mail</span>
-                {{ $employee->email }}
+                {{ $employee->user?->email ?? $employee->email }}
             </p>
             @if($employee->phone)
             <p class="flex items-center gap-2">
